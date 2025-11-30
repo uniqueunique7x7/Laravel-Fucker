@@ -226,7 +226,7 @@ class ResultsPanel(ttk.Frame):
     
     def _create_live_context_menu(self) -> None:
         """Create context menu for live feed."""
-        self.live_menu = tk.Menu(self, tearoff=0, **self.theme.get_menu_config())
+        self.live_menu = tk.Menu(self, **self.theme.get_menu_config())
         self.live_menu.add_command(label="Copy URL", command=self._copy_url)
         self.live_menu.add_command(label="View Details", command=self._view_selected)
         self.live_menu.add_separator()
@@ -236,7 +236,7 @@ class ResultsPanel(ttk.Frame):
     
     def _create_success_context_menu(self) -> None:
         """Create context menu for successful finds."""
-        self.success_menu = tk.Menu(self, tearoff=0, **self.theme.get_menu_config())
+        self.success_menu = tk.Menu(self, **self.theme.get_menu_config())
         self.success_menu.add_command(label="Copy URL", command=self._copy_success_url)
         self.success_menu.add_command(label="Copy Content", command=self._copy_success_content)
         self.success_menu.add_command(label="View Details", command=self._view_success_details)

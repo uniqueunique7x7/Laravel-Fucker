@@ -1,1 +1,1 @@
-py env.py
+py main.py
