@@ -7,6 +7,7 @@ Supports filtering by region and service type.
 
 import json
 import os
+import random
 import time
 import ipaddress
 from typing import List, Dict, Generator, Optional, Set
@@ -252,8 +253,6 @@ class AWSIPFetcher:
         Yields:
             Individual IP address strings
         """
-        import random
-        
         cidr_ranges = self.get_cidr_ranges(regions, services, ipv6=False)
         
         if randomize:

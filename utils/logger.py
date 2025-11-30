@@ -118,8 +118,10 @@ class AppLogger:
         # Add to queue (non-blocking)
         try:
             self._queue.put_nowait(record)
-        except:
-            pass  # Queue full, drop message
+        except queue.Full:
+            # Queue full, message will still go to file and callbacks
+            import sys
+            print(f"[WARN] Log queue full, message queuing skipped", file=sys.stderr)
         
         # Write to file if configured
         if self._file_handler:
@@ -134,15 +136,16 @@ class AppLogger:
                     exc_info=None
                 )
                 self._file_handler.emit(log_record)
-            except:
-                pass
+            except (IOError, OSError) as e:
+                import sys
+                print(f"[WARN] Failed to write log to file: {e}", file=sys.stderr)
         
         # Notify callbacks
         with self._lock:
             for callback in self._callbacks:
                 try:
                     callback(record)
-                except:
+                except Exception:
                     pass
     
     def debug(self, message: str) -> None:

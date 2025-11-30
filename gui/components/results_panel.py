@@ -7,7 +7,13 @@ Display and manage scan results with tabs for different views.
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from typing import List, Optional, Callable
-import pyperclip
+
+# Try to import pyperclip, fall back to tkinter clipboard if not available
+try:
+    import pyperclip
+    HAS_PYPERCLIP = True
+except ImportError:
+    HAS_PYPERCLIP = False
 
 
 class ResultsPanel(ttk.Frame):
@@ -349,11 +355,7 @@ class ResultsPanel(ttk.Frame):
         if selection:
             values = self.live_tree.item(selection[0], 'values')
             if len(values) >= 2:
-                try:
-                    pyperclip.copy(values[1])
-                except:
-                    self.clipboard_clear()
-                    self.clipboard_append(values[1])
+                self._copy_to_clipboard(values[1])
     
     def _copy_success_url(self) -> None:
         """Copy URL from successful finds."""
@@ -361,11 +363,7 @@ class ResultsPanel(ttk.Frame):
         if selection:
             values = self.success_tree.item(selection[0], 'values')
             if len(values) >= 2:
-                try:
-                    pyperclip.copy(values[1])
-                except:
-                    self.clipboard_clear()
-                    self.clipboard_append(values[1])
+                self._copy_to_clipboard(values[1])
     
     def _copy_success_content(self) -> None:
         """Copy content from successful find."""
@@ -376,11 +374,7 @@ class ResultsPanel(ttk.Frame):
                 url = values[1]
                 for result in self._successful_results:
                     if result['url'] == url:
-                        try:
-                            pyperclip.copy(result['content'])
-                        except:
-                            self.clipboard_clear()
-                            self.clipboard_append(result['content'])
+                        self._copy_to_clipboard(result['content'])
                         break
     
     def _view_selected(self) -> None:
@@ -403,11 +397,19 @@ class ResultsPanel(ttk.Frame):
     def _copy_details(self) -> None:
         """Copy details text to clipboard."""
         content = self.details_text.get('1.0', tk.END)
-        try:
-            pyperclip.copy(content)
-        except:
-            self.clipboard_clear()
-            self.clipboard_append(content)
+        self._copy_to_clipboard(content)
+    
+    def _copy_to_clipboard(self, text: str) -> None:
+        """Copy text to clipboard using pyperclip or tkinter fallback."""
+        if HAS_PYPERCLIP:
+            try:
+                pyperclip.copy(text)
+                return
+            except Exception:
+                pass
+        # Fallback to tkinter clipboard
+        self.clipboard_clear()
+        self.clipboard_append(text)
     
     def _save_details(self) -> None:
         """Save details to file."""

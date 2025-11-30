@@ -117,7 +117,8 @@ class ScannerCore:
         timeout: int = 5,
         request_delay: float = 0.1,
         retry_attempts: int = 3,
-        output_directory: str = './results'
+        output_directory: str = './results',
+        verify_ssl: bool = False
     ):
         """
         Initialize the scanner.
@@ -128,12 +129,14 @@ class ScannerCore:
             request_delay: Delay between requests (rate limiting)
             retry_attempts: Number of retry attempts on failure
             output_directory: Directory to save results
+            verify_ssl: Whether to verify SSL certificates (default False for scanning)
         """
         self.max_threads = max_threads
         self.timeout = timeout
         self.request_delay = request_delay
         self.retry_attempts = retry_attempts
         self.output_directory = output_directory
+        self.verify_ssl = verify_ssl
         
         # State management
         self._state = ScannerState.IDLE
@@ -326,7 +329,7 @@ class ScannerCore:
                         headers=headers,
                         timeout=self.timeout,
                         allow_redirects=False,
-                        verify=False,
+                        verify=self.verify_ssl,
                         stream=False
                     )
                     
@@ -445,9 +448,10 @@ class ScannerCore:
             self._stats.start_time = datetime.now()
             self._stats.total_targets = total_targets
         
-        # Disable SSL warnings
-        import urllib3
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        # Disable SSL warnings only if SSL verification is disabled
+        if not self.verify_ssl:
+            import urllib3
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         
         try:
             with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
